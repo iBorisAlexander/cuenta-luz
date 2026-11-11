@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuenta de la luz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f3f5f7;
+    --card: #ffffff;
+    --ink: #14213d;
+    --muted: #5d6b82;
+    --line: #d5dbe4;
+    --volt: #ffd60a;
+    --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0f1626;
+      --card: #172036;
+      --ink: #eef1f7;
+      --muted: #9aa8c2;
+      --line: #2b3652;
+      --volt: #ffd60a;
+      --err: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    padding: 24px 16px 64px;
+  }
+  main { max-width: 520px; margin: 0 auto; }
+  h1 { font-size: 2rem; line-height: 1.1; margin: 8px 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+
+  fieldset {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 12px;
+    padding: 18px 18px 6px;
+    margin: 0 0 20px;
+  }
+  legend { font-weight: 700; padding: 0 8px; margin-left: -8px; }
+
+  .field { margin-bottom: 14px; }
+  label { display: block; font-weight: 500; margin-bottom: 4px; }
+  .input {
+    display: flex; align-items: center;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 0 12px;
+  }
+  .input:focus-within { border-color: var(--ink); outline: 3px solid var(--volt); outline-offset: 1px; }
+  .input span { color: var(--muted); }
+  .input input {
+    flex: 1; min-width: 0;
+    border: 0; background: transparent; color: inherit;
+    font: inherit; font-size: 1.1rem;
+    padding: 10px 6px; outline: none;
+  }
+
+  ol { list-style: none; counter-reset: paso; margin: 0; padding: 0; }
+  ol li {
+    counter-increment: paso;
+    display: grid; grid-template-columns: 28px 1fr; gap: 4px 10px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+  }
+  ol li:first-child { border-top: 0; }
+  ol li::before {
+    content: counter(paso);
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    font-weight: 700; font-size: .9rem;
+    display: grid; place-items: center;
+    grid-row: 1 / span 2;
+  }
+  .what { color: var(--muted); font-size: .95rem; }
+  .res { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+  .res small { font-size: 1rem; font-weight: 500; color: var(--muted); }
+  .res.empty { color: var(--line); }
+  .field.inline { grid-column: 2; margin: 6px 0 0; }
+
+  .resto {
+    background: var(--volt); color: #14213d;
+    border-radius: 12px; padding: 18px;
+    margin-bottom: 20px;
+  }
+  .resto .what { color: #14213d; opacity: .75; }
+  .resto .res { font-size: 2.2rem; color: #14213d; }
+  .resto .res.empty { color: rgba(20,33,61,.35); }
+
+  .warn { color: var(--err); font-size: .95rem; margin: 6px 0 0; min-height: 1.4em; }
+  button {
+    font: inherit; font-weight: 500;
+    background: transparent; color: var(--ink);
+    border: 1.5px solid var(--line); border-radius: 8px;
+    padding: 10px 16px; cursor: pointer;
+  }
+  button:hover { border-color: var(--ink); }
+  button:focus-visible { outline: 3px solid var(--volt); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cuenta de la luz</h1>
+  <p class="sub">Llena los datos de la boleta y de los remarcadores. Los cálculos se hacen solos.</p>
+
+  <fieldset>
+    <legend>Datos de la boleta</legend>
+    <div class="field">
+      <label for="valorMes">Valor mes (total boleta)</label>
+      <div class="input"><span>$</span><input id="valorMes" type="number" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <div class="field">
+      <label for="kwhTotal">kWh total boleta</label>
+      <div class="input"><input id="kwhTotal" type="number" inputmode="decimal" min="0" step="any"><span>kWh</span></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Remarcador</legend>
+    <div class="field">
+      <label for="actual">Remarcador actual</label>
+      <div class="input"><input id="actual" type="number" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <div class="field">
+      <label for="anterior">Remarcador anterior</label>
+      <div class="input"><input id="anterior" type="number" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <p class="warn" id="warn" role="alert"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cálculo</legend>
+    <ol>
+      <li>
+        <div class="what">Remarcador actual − remarcador anterior</div>
+        <div class="res empty" id="r1">—</div>
+      </li>
+      <li>
+        <div class="what">Valor mes ÷ kWh total</div>
+        <div class="res empty" id="r2">—</div>
+      </li>
+      <li>
+        <div class="what">kWh consumidos × valor kWh</div>
+        <div class="res empty" id="r3">—</div>
+      </li>
+      <li>
+        <div class="what">Monto que paga vicho</div>
+        <div class="res empty" id="r4">—</div>
+      </li>
+    </ol>
+  </fieldset>
+
+  <div class="resto">
+    <div class="what">Resto: total boleta − consumo persona</div>
+    <div class="res empty" id="r5">—</div>
+  </div>
+
+  <button type="button" id="limpiar">Limpiar todo</button>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const ids = ["valorMes", "kwhTotal", "actual", "anterior"];
+  const num = id => { const v = $(id).value; return v === "" ? null : parseFloat(v); };
+
+  const clp = n => "$" + Math.round(n).toLocaleString("es-CL");
+  const dec = (n, d) => n.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: d });
+
+  function show(id, html) {
+    const el = $(id);
+    el.classList.toggle("empty", html === null);
+    el.innerHTML = html === null ? "—" : html;
+  }
+
+  function calcular() {
+    const valorMes = num("valorMes"), kwhTotal = num("kwhTotal");
+    const actual = num("actual"), anterior = num("anterior");
+
+    // 1. consumo
+    let consumo = null;
+    $("warn").textContent = "";
+    if (actual !== null && anterior !== null) {
+      if (actual < anterior) {
+        $("warn").textContent = "El remarcador actual no puede ser menor que el anterior.";
+      } else {
+        consumo = actual - anterior;
+      }
+    }
+    show("r1", consumo === null ? null : `${dec(consumo, 2)} <small>kWh</small>`);
+
+    // 2. valor por kWh
+    let valorKwh = null;
+    if (valorMes !== null && kwhTotal) valorKwh = valorMes / kwhTotal;
+    show("r2", valorKwh === null ? null : `${dec(valorKwh, 2)} <small>$/kWh</small>`);
+
+    // 3. consumo en pesos
+    let persona = null;
+    if (consumo !== null && valorKwh !== null) persona = consumo * valorKwh;
+    show("r3", persona === null ? null : clp(persona));
+
+    // 4. lo que paga vicho (su consumo)
+    show("r4", persona === null ? null : clp(persona));
+
+    // 5. resto: total boleta - consumo de vicho
+    show("r5", valorMes !== null && persona !== null ? clp(valorMes - persona) : null);
+  }
+
+  ids.forEach(id => $(id).addEventListener("input", calcular));
+  $("limpiar").addEventListener("click", () => {
+    ids.forEach(id => $(id).value = "");
+    calcular();
+  });
+  calcular();
+</script>
+</body>
+</html>
